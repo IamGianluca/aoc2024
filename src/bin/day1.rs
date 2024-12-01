@@ -17,11 +17,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         second.push(b);
     }
     let result = total_diff(&mut first, &mut second);
-    println!("{:?}", result);
+    println!("The result of the first part is: {:?}", result);
     Ok(())
 }
 
-fn total_diff(a: &mut Vec<i64>, b: &mut Vec<i64>) -> i64 {
+fn total_diff(a: &mut [i64], b: &mut [i64]) -> i64 {
     // sort vectors
     a.sort();
     b.sort();
