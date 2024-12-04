@@ -27,33 +27,51 @@ fn is_safe(s: String, tol: u8) -> bool {
         .map(|x| x.parse::<u8>().unwrap())
         .collect();
 
-    let op = if *s.first().unwrap() > *s.last().unwrap() {
-        |x: u8, y: u8| x < y
-    } else {
-        |x: u8, y: u8| x > y
-    };
-
-    let mut previous = 0;
-    let mut errors = 0;
-    for (i, level) in s.iter().enumerate() {
-        if i == 0 {
-            previous = *level;
-            continue;
-        }
-        if op(*level, previous) {
-            if ((*level as i8) - (previous as i8)).abs() > 3 {
-                errors += 1;
-            } else {
-                previous = *level;
-            };
+    if tol == 0 {
+        let op = if *s.first().unwrap() > *s.last().unwrap() {
+            |x: u8, y: u8| x < y
         } else {
-            errors += 1;
+            |x: u8, y: u8| x > y
         };
+
+        let mut previous = 0;
+        let mut errors = 0;
+        for (i, level) in s.iter().enumerate() {
+            if i == 0 {
+                previous = *level;
+                continue;
+            }
+            if op(*level, previous) {
+                if ((*level as i8) - (previous as i8)).abs() > 3 {
+                    errors += 1;
+                } else {
+                    previous = *level;
+                };
+            } else {
+                errors += 1;
+            };
+        }
+        if errors > tol {
+            return false;
+        };
+        true
+    } else {
+        for i in 0..s.len() {
+            let mut new_s = s.clone();
+            new_s.remove(i);
+            if is_safe(
+                new_s
+                    .iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                tol - 1,
+            ) {
+                return true;
+            }
+        }
+        false
     }
-    if errors > tol {
-        return false;
-    };
-    true
 }
 
 #[cfg(test)]
