@@ -5,37 +5,28 @@ use regex::Regex;
 fn main() {
     let input = fs::read_to_string("./day3_data.txt").unwrap();
 
-    let mut sum_p1 = 0;
-    for instruction in input.lines() {
-        sum_p1 += compute(instruction);
-    }
+    let sum_p1 = compute(input.as_str());
     println!("Part 1 result: {:?}", sum_p1);
 
-    let mut sum_p2 = 0;
-    for instruction in input.lines() {
-        sum_p2 += compute_dos_and_donts(instruction);
-    }
+    let sum_p2 = compute_dos_and_donts(input.as_str());
     println!("Part 2 result: {:?}", sum_p2);
 }
 
 fn compute_dos_and_donts(instruction: &str) -> u64 {
-    let re = Regex::new(r"(mul\((\d{1,3}),(\d{1,3})\))|do\(\)|don't\(\)").unwrap();
+    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|(d)(o)(?:n't)?\(\)").unwrap();
     let mut result = 0;
     let mut mul_enabled = true;
-    for cap in re.captures_iter(instruction) {
-        if let Some(_mul_cap) = cap.get(1) {
-            if mul_enabled {
-                let x: u64 = cap[2].parse().unwrap();
-                let y: u64 = cap[3].parse().unwrap();
-                result += x * y;
-                println!("Mul: {} * {} = {}", x, y, x * y);
+    for (s, [x, y]) in re.captures_iter(instruction).map(|c| c.extract()) {
+        match s {
+            "do()" => mul_enabled = true,
+            "don't()" => mul_enabled = false,
+            _ => {
+                if mul_enabled {
+                    let x: u64 = x.parse().unwrap();
+                    let y: u64 = y.parse().unwrap();
+                    result += x * y;
+                }
             }
-        } else if cap.get(0).map_or("", |m| m.as_str()) == "do()" {
-            mul_enabled = true;
-            println!("State: {}", mul_enabled);
-        } else if cap.get(0).map_or("", |m| m.as_str()) == "don't()" {
-            mul_enabled = false;
-            println!("State: {}", mul_enabled);
         }
     }
     result
