@@ -13,18 +13,16 @@ fn main() {
 }
 
 fn compute_dos_and_donts(instruction: &str) -> u64 {
-    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|(d)(o)(?:n't)?\(\)").unwrap();
+    let re = Regex::new(r"(mul\(\d{1,3},\d{1,3}\))|(don't\(\))|(do\(\))").unwrap();
     let mut result = 0;
     let mut mul_enabled = true;
-    for (s, [x, y]) in re.captures_iter(instruction).map(|c| c.extract()) {
+    for (s, [_]) in re.captures_iter(instruction).map(|c| c.extract()) {
         match s {
             "do()" => mul_enabled = true,
             "don't()" => mul_enabled = false,
             _ => {
                 if mul_enabled {
-                    let x: u64 = x.parse().unwrap();
-                    let y: u64 = y.parse().unwrap();
-                    result += x * y;
+                    result += compute(s);
                 }
             }
         }
