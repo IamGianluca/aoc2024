@@ -19,19 +19,23 @@ fn main() {
 }
 
 fn compute_dos_and_donts(instruction: &str) -> u64 {
-    let re = Regex::new(r"(mul\((\d+),(\d+)\))|do\(\)|don't\(\)").unwrap();
+    let re = Regex::new(r"(mul\((\d{1,3}),(\d{1,3})\))|do\(\)|don't\(\)").unwrap();
     let mut result = 0;
     let mut mul_enabled = true;
     for cap in re.captures_iter(instruction) {
-        if let Some(v) = cap.get(1) {
+        if let Some(_mul_cap) = cap.get(1) {
             if mul_enabled {
-                let mul_str = v.as_str();
-                result += compute(mul_str);
+                let x: u64 = cap[2].parse().unwrap();
+                let y: u64 = cap[3].parse().unwrap();
+                result += x * y;
+                println!("Mul: {} * {} = {}", x, y, x * y);
             }
         } else if cap.get(0).map_or("", |m| m.as_str()) == "do()" {
             mul_enabled = true;
+            println!("State: {}", mul_enabled);
         } else if cap.get(0).map_or("", |m| m.as_str()) == "don't()" {
             mul_enabled = false;
+            println!("State: {}", mul_enabled);
         }
     }
     result
