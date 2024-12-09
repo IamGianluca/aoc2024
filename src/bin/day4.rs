@@ -32,14 +32,14 @@ fn get_possible_sequences(input: &str, xes_loc: Vec<(usize, usize)>) -> u64 {
     let x_max = grid.len() as i64;
     let y_max = grid[0].len() as i64;
     let directions: [(i64, i64); 8] = [
-        (0, -1),
-        (0, 1),
-        (1, 0),
-        (-1, 0),
-        (1, -1),
-        (1, 1),
-        (-1, -1),
-        (-1, 1),
+        (0, -1),  // left
+        (0, 1),   // right
+        (1, 0),   // up
+        (-1, 0),  // down
+        (1, -1),  // upper left diagonal
+        (1, 1),   // upper right diagonal
+        (-1, -1), // lower left diagonal
+        (-1, 1),  // lower right diagonal
     ];
     for loc in xes_loc {
         for direction in directions {
