@@ -6,15 +6,18 @@ fn main() {
     let input = fs::read_to_string("./day4_data.txt").unwrap();
     let result_p1 = solve_p1(input.as_str());
     println!("Result p1: {}", result_p1);
+
+    let result_p2 = solve_p2(input.as_str());
+    println!("Result p2: {}", result_p2);
 }
 
 fn solve_p1(input: &str) -> u64 {
-    let xes_loc = get_xes_location(input);
+    let xes_loc = get_letter_location(input, "X");
     get_possible_sequences(input, xes_loc)
 }
 
-fn get_xes_location(input: &str) -> Vec<(usize, usize)> {
-    let re = Regex::new("X").unwrap();
+fn get_letter_location(input: &str, letter: &str) -> Vec<(usize, usize)> {
+    let re = Regex::new(letter).unwrap();
     let mut result: Vec<(usize, usize)> = Vec::new();
 
     for (r, line) in input.lines().enumerate() {
@@ -60,15 +63,49 @@ fn get_possible_sequences(input: &str, xes_loc: Vec<(usize, usize)>) -> u64 {
     counter
 }
 
+fn solve_p2(input: &str) -> u64 {
+    let mut counter = 0;
+
+    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let x_max = grid.len() - 1;
+    let y_max = grid[0].len() - 1;
+
+    let centroids = get_letter_location(input, "A");
+    for centroid in centroids {
+        if centroid.0 > 0 && centroid.0 < x_max && centroid.1 > 0 && centroid.1 < y_max {
+            let first_seq = vec![
+                grid[centroid.0 - 1][centroid.1 + 1],
+                grid[centroid.0][centroid.1],
+                grid[centroid.0 + 1][centroid.1 - 1],
+            ];
+
+            let second_seq = vec![
+                grid[centroid.0 - 1][centroid.1 - 1],
+                grid[centroid.0][centroid.1],
+                grid[centroid.0 + 1][centroid.1 + 1],
+            ];
+
+            let first_string = String::from_iter(first_seq);
+            if first_string == "MAS" || first_string == "SAM" {
+                let second_string = String::from_iter(second_seq);
+                if second_string == "MAS" || second_string == "SAM" {
+                    counter += 1
+                }
+            }
+        }
+    }
+    counter
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{get_possible_sequences, get_xes_location};
+    use crate::{get_letter_location, get_possible_sequences, solve_p2};
 
     #[test]
     fn test_simple() {
         let input = "..X...\n.SAMX.\n.A..A.\nXMAS.S\n.X....";
         assert_eq!(
-            get_xes_location(input),
+            get_letter_location(input, "X"),
             vec![(0, 2), (1, 4), (3, 0), (4, 1)]
         );
     }
@@ -76,7 +113,19 @@ mod tests {
     #[test]
     fn test_get_possible_sequence() {
         let input = "..X...\n.SAMX.\n.A..A.\nXMAS.S\n.X....";
-        let xes_loc = get_xes_location(input);
+        let xes_loc = get_letter_location(input, "X");
         assert_eq!(get_possible_sequences(input, xes_loc), 4);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = "M.S\n.A.\nM.S\n";
+        assert_eq!(solve_p2(input), 1);
+    }
+
+    #[test]
+    fn test_part2_complex() {
+        let input = ".M.S......\n..A..MSMS.\n.M.S.MAA..\n..A.ASMSM.\n.M.S.M....\n..........\nS.S.S.S.S.\n.A.A.A.A..\nM.M.M.M.M.\n..........";
+        assert_eq!(solve_p2(input), 9);
     }
 }
