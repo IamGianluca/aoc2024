@@ -1,7 +1,9 @@
-use std::{collections::HashMap, u64};
+use std::{collections::HashMap, fs};
 
 fn main() {
-    unimplemented!()
+    let input = fs::read_to_string("./day5_data.txt").unwrap();
+    let result = solve_p1(input.as_str());
+    println!("{:?}", result)
 }
 
 fn solve_p1(input: &str) -> u64 {
@@ -13,7 +15,6 @@ fn solve_p1(input: &str) -> u64 {
 fn process_rules(input: &str) -> HashMap<u64, Vec<u64>> {
     let mut m = HashMap::<u64, Vec<u64>>::new();
     for line in input.lines() {
-        println!("{:?}", line);
         process_rule(&mut m, line);
     }
     m
@@ -50,6 +51,23 @@ fn process_lists(input: &str, rules: HashMap<u64, Vec<u64>>) -> u64 {
 }
 
 fn process_list(line: Vec<u64>, rules: &HashMap<u64, Vec<u64>>) -> u64 {
+    let mut prev = 0;
+    for (i, elem) in line.iter().enumerate() {
+        if i == 0 {
+            prev = *elem
+        } else {
+            let valid = match rules.get(elem) {
+                Some(value) => value,
+                None => return 0,
+            };
+            if valid.contains(&prev) {
+                prev = *elem;
+                continue;
+            } else {
+                return 0;
+            }
+        }
+    }
     line[line.len() / 2]
 }
 
@@ -71,7 +89,6 @@ mod tests {
 97|53
 75|29";
         let result = process_rules(input);
-        println!("Result: {:?}", result);
         let result = result.get(&53).unwrap();
         assert_eq!(*result, vec![47, 97]);
     }
@@ -85,36 +102,45 @@ mod tests {
         assert_eq!(solve_p1(input), 13);
     }
 
-    // #[test]
-    //     fn test_basics() {
-    //         let input = "47|53
-    //     97|13
-    //     97|61
-    //     97|47
-    //     75|29
-    //     61|13
-    //     75|53
-    //     29|13
-    //     97|29
-    //     53|29
-    //     61|53
-    //     97|53
-    //     61|29
-    //     47|13
-    //     75|47
-    //     97|75
-    //     47|61
-    //     75|61
-    //     47|29
-    //     75|13
-    //     53|13
-    //
-    //     75,47,61,53,29
-    //     97,61,53,29,13
-    //     75,29,13
-    //     75,97,47,61,53
-    //     61,13,29
-    //     97,13,75,29,47";
-    //         assert_eq!(solve_p1(input), 1);
-    //     }
+    #[test]
+    fn test_incorrect_list() {
+        let input = "13|75
+        97|13
+
+        97,75,13";
+        assert_eq!(solve_p1(input), 0);
+    }
+
+    #[test]
+    fn test_basics() {
+        let input = "47|53
+        97|13
+        97|61
+        97|47
+        75|29
+        61|13
+        75|53
+        29|13
+        97|29
+        53|29
+        61|53
+        97|53
+        61|29
+        47|13
+        75|47
+        97|75
+        47|61
+        75|61
+        47|29
+        75|13
+        53|13
+
+        75,47,61,53,29
+        97,61,53,29,13
+        75,29,13
+        75,97,47,61,53
+        61,13,29
+        97,13,75,29,47";
+        assert_eq!(solve_p1(input), 143);
+    }
 }
