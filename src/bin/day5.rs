@@ -1,27 +1,19 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, u64};
 
 fn main() {
     unimplemented!()
 }
 
 fn solve_p1(input: &str) -> u64 {
-    // page ordering rules
-    for line in input.lines() {
-        if line.is_empty() {
-            break;
-        } else {
-            println!("{}", line);
-        }
-    }
-    // process update sequence
-    process_all_rules(input);
-    // return
-    16
+    let sections: Vec<&str> = input.split("\n\n").collect();
+    let rules = process_rules(sections[0]);
+    process_lists(sections[1], rules)
 }
 
-fn process_all_rules(input: &str) -> HashMap<u64, Vec<u64>> {
+fn process_rules(input: &str) -> HashMap<u64, Vec<u64>> {
     let mut m = HashMap::<u64, Vec<u64>>::new();
     for line in input.lines() {
+        println!("{:?}", line);
         process_rule(&mut m, line);
     }
     m
@@ -30,7 +22,7 @@ fn process_all_rules(input: &str) -> HashMap<u64, Vec<u64>> {
 fn process_rule(m: &mut HashMap<u64, Vec<u64>>, input: &str) {
     let r: Vec<u64> = input
         .split("|")
-        .map(|x| x.parse::<u64>().unwrap())
+        .map(|x| x.trim().parse::<u64>().unwrap())
         .collect();
     let first = r.first().unwrap();
     let last = r.get(1).unwrap();
@@ -45,6 +37,22 @@ fn process_rule(m: &mut HashMap<u64, Vec<u64>>, input: &str) {
     };
 }
 
+fn process_lists(input: &str, rules: HashMap<u64, Vec<u64>>) -> u64 {
+    let mut result = 0;
+    for line in input.lines() {
+        let line = line
+            .split(",")
+            .map(|x| x.trim().parse::<u64>().unwrap())
+            .collect();
+        result += process_list(line, &rules);
+    }
+    result
+}
+
+fn process_list(line: Vec<u64>, rules: &HashMap<u64, Vec<u64>>) -> u64 {
+    line[line.len() / 2]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,9 +60,8 @@ mod tests {
     #[test]
     fn test_process_one_rule() {
         let input = "47|53";
-        let mut map = HashMap::<u64, Vec<u64>>::new();
-        process_rule(&mut map, input);
-        let result = map.get(&53).unwrap();
+        let rules = process_rules(input);
+        let result = rules.get(&53).unwrap();
         assert_eq!(*result, vec![47]);
     }
 
@@ -63,13 +70,22 @@ mod tests {
         let input = "47|53
 97|53
 75|29";
-        let result = process_all_rules(input);
+        let result = process_rules(input);
         println!("Result: {:?}", result);
         let result = result.get(&53).unwrap();
         assert_eq!(*result, vec![47, 97]);
     }
 
-    //     #[test]
+    #[test]
+    fn test_simple_complete_case() {
+        let input = "13|75
+        97|13
+
+        97,13,75";
+        assert_eq!(solve_p1(input), 13);
+    }
+
+    // #[test]
     //     fn test_basics() {
     //         let input = "47|53
     //     97|13
