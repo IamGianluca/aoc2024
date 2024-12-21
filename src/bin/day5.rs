@@ -2,11 +2,12 @@ use std::{collections::HashMap, fs};
 
 fn main() {
     let input = fs::read_to_string("./day5_data.txt").unwrap();
-    let result = solve_p1(input.as_str());
-    println!("{:?}", result)
+    let result = solve_puzzle(input.as_str());
+    println!("Solution part 1: {:?}", result);
+    println!("Solution part 2: {:?}", 0);
 }
 
-fn solve_p1(input: &str) -> u64 {
+fn solve_puzzle(input: &str) -> u64 {
     let sections: Vec<&str> = input.split("\n\n").collect();
     let rules = process_rules(sections[0]);
     process_lists(sections[1], rules)
@@ -45,12 +46,20 @@ fn process_lists(input: &str, rules: HashMap<u64, Vec<u64>>) -> u64 {
             .split(",")
             .map(|x| x.trim().parse::<u64>().unwrap())
             .collect();
-        result += process_list(line, &rules);
+        result += process_list_part1(line, &rules);
     }
     result
 }
 
-fn process_list(line: Vec<u64>, rules: &HashMap<u64, Vec<u64>>) -> u64 {
+fn process_list_part1(line: Vec<u64>, rules: &HashMap<u64, Vec<u64>>) -> u64 {
+    if is_correct_order(&line, rules) {
+        line[line.len() / 2]
+    } else {
+        0
+    }
+}
+
+fn is_correct_order(line: &[u64], rules: &HashMap<u64, Vec<u64>>) -> bool {
     let mut prev = 0;
     for (i, elem) in line.iter().enumerate() {
         if i == 0 {
@@ -58,17 +67,17 @@ fn process_list(line: Vec<u64>, rules: &HashMap<u64, Vec<u64>>) -> u64 {
         } else {
             let valid = match rules.get(elem) {
                 Some(value) => value,
-                None => return 0,
+                None => return false,
             };
             if valid.contains(&prev) {
                 prev = *elem;
                 continue;
             } else {
-                return 0;
+                return false;
             }
         }
     }
-    line[line.len() / 2]
+    true
 }
 
 #[cfg(test)]
@@ -99,7 +108,7 @@ mod tests {
         97|13
 
         97,13,75";
-        assert_eq!(solve_p1(input), 13);
+        assert_eq!(solve_puzzle(input), 13);
     }
 
     #[test]
@@ -108,7 +117,7 @@ mod tests {
         97|13
 
         97,75,13";
-        assert_eq!(solve_p1(input), 0);
+        assert_eq!(solve_puzzle(input), 0);
     }
 
     #[test]
@@ -141,6 +150,6 @@ mod tests {
         75,97,47,61,53
         61,13,29
         97,13,75,29,47";
-        assert_eq!(solve_p1(input), 143);
+        assert_eq!(solve_puzzle(input), 143);
     }
 }
