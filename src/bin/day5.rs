@@ -80,6 +80,38 @@ fn is_correct_order(line: &[u64], rules: &HashMap<u64, Vec<u64>>) -> bool {
     true
 }
 
+fn sort_sequence(sequence: &str, map: &HashMap<u64, Vec<u64>>) -> Vec<u64> {
+    let mut sequence: Vec<u64> = sequence
+        .split(",")
+        .map(|x| x.parse::<u64>().unwrap())
+        .collect();
+
+    for i in 1..sequence.len() {
+        let curr = sequence[i];
+        let prev = sequence[i - 1];
+        match map.get(&curr) {
+            Some(v) => {
+                if v.contains(&prev) {
+                    println!("Found");
+                    continue;
+                } else {
+                    println!("Not Found");
+                    let element = sequence.remove(i);
+                    for e in (0..i).rev() {
+                        println!("{:?}", e);
+                        if v.contains(&sequence[e]) {
+                            sequence.insert(e + 1, element);
+                            continue;
+                        }
+                    }
+                }
+            }
+            None => return vec![9999],
+        }
+    }
+    sequence
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,5 +183,22 @@ mod tests {
         61,13,29
         97,13,75,29,47";
         assert_eq!(solve_puzzle(input), 143);
+    }
+
+    #[test]
+    fn test_part2_simple() {
+        // given
+        let rules_str = "61|13
+        29|13
+        61|29 ";
+        let rules = process_rules(rules_str);
+        let sequence = "61,13,29";
+
+        // when
+        let result = sort_sequence(sequence, &rules);
+
+        // then
+        let expected = vec![61, 29, 13];
+        assert_eq!(result, expected);
     }
 }
