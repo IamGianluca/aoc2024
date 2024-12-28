@@ -92,8 +92,6 @@ fn count_visited(grid: &Vec<Vec<char>>) -> u64 {
 
 #[cfg(test)]
 mod test {
-    use std::fs;
-
     use crate::{count_visited, get_starting_position, solve_part1};
 
     #[test]
