@@ -2,43 +2,78 @@ fn main() {
     todo!();
 }
 
+#[allow(dead_code)]
 fn solve_part1(input: &str) -> u64 {
     let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    let grid_len = grid.len();
-    let grid_hei = grid[0].len();
 
-    for (r, row) in grid.iter().enumerate() {
-        // find starting point or move to next row
-        let c = match row.iter().position(|x| *x == '^') {
-            Some(c) => c,
-            None => continue,
+    const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+    let mut direction_index = 0;
+    for line in grid.iter() {
+        println!("{:?}", line);
+    }
+    let mut current_position = get_starting_position(&grid);
+    println!(
+        "Starting position: ({:?}, {:?})",
+        current_position.0, current_position.1
+    );
+
+    // Move until we reach the end of the board. If there is something directly in front of
+    // you, turn right 90 degrees. Otherwise, take a step forward.
+    let mut steps_count = 0;
+
+    let mut continue_game = true;
+    while continue_game {
+        // Propose next step
+        let direction = DIRECTIONS[direction_index % 4];
+        let candidate_position = (
+            (current_position.0 as i64 + direction.0) as usize,
+            (current_position.1 as i64 + direction.1) as usize,
+        );
+
+        // If next step contains an obstacle, turn right. If next step is out of the grid,
+        // the game is over.
+        // Looks a good candidate to use pattern matching!
+        // Remember to increase steps_count if we moved.
+        // And don't forget to update continue_game to false if the game is over.
+        let candidate = match grid.get(candidate_position.0) {
+            Some(v) => v,
+            None => return steps_count,
         };
-        println!("Found starting point at row {r} and column {c}");
-
-        // move until we find an obstacle or reach the end of the board
-        let trajectory = &grid[r..0][c];
-        if trajectory.contains(&'#') {
-            // obstacle was reached
-            let c = match trajectory.iter().position(|x| *x == '#') {
-                Some(c) => c,
-                None => continue,
-            };
-        } else {
-            // end of board reached
-            return 200;
+        let candidate = match candidate.get(candidate_position.1) {
+            Some(v) => v,
+            None => return steps_count,
+        };
+        println!("Step: {:?}, Value: {:?}", steps_count, candidate);
+        match candidate {
+            '#' => {
+                // Skip and turn right next time
+                direction_index += 1;
+            }
+            '.' => {
+                // Valid landing spot
+                current_position = candidate_position;
+                steps_count += 1;
+                continue;
+            }
+            '^' => {
+                // Valid landing spot
+                current_position = candidate_position;
+                steps_count += 1;
+                continue;
+            }
+            _ => continue_game = false,
         };
     }
-    0
+    steps_count
 }
 
-fn find_starting_point(grid: Vec<Vec<char>>) -> (usize, usize) {
+fn get_starting_position(grid: &Vec<Vec<char>>) -> (usize, usize) {
     for (r, row) in grid.iter().enumerate() {
-        // find starting point or move to next row
+        // Find starting point or move to next row
         let c = match row.iter().position(|x| *x == '^') {
             Some(c) => c,
             None => continue,
         };
-        println!("Found starting point at row {r} and column {c}");
         return (r, c);
     }
     (99999, 99999)
@@ -46,11 +81,11 @@ fn find_starting_point(grid: Vec<Vec<char>>) -> (usize, usize) {
 
 #[cfg(test)]
 mod test {
-    use crate::{find_starting_point, solve_part1};
+    use crate::{get_starting_position, solve_part1};
 
     #[test]
     fn test_find_starting_point() {
-        // given
+        // Given
         let input = "....#.....
 .........#
 ..........
@@ -63,10 +98,10 @@ mod test {
 ......#...";
         let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
-        // when
-        let result = find_starting_point(grid);
+        // When
+        let result = get_starting_position(&grid);
 
-        // then
+        // Then
         let expected = (6, 4);
         assert_eq!(result, expected);
     }
