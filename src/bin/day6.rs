@@ -2,29 +2,23 @@ use std::fs;
 
 fn main() {
     let input = fs::read_to_string("./day6_data.txt").unwrap();
+
     let result_p1 = solve_part1(input.as_str());
-    println!("Result part 1: {:?}", result_p1)
+    println!("Result part 1: {:?}", result_p1);
+
+    let result_p2 = solve_part2(input.as_str());
+    println!("Result part 2: {:?}", result_p2);
 }
 
-#[allow(dead_code)]
 fn solve_part1(input: &str) -> u64 {
     let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
     const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
     let mut direction_index = 0;
-    // for line in grid.iter() {
-    //     println!("{:?}", line);
-    // }
     let mut current_position = get_starting_position(&grid);
-    // println!(
-    //     "Starting position: ({:?}, {:?})",
-    //     current_position.0, current_position.1
-    // );
 
     // Move until we reach the end of the board. If there is something directly in front of
     // you, turn right 90 degrees. Otherwise, take a step forward.
-    let mut steps_count = 0;
-
     let mut continue_game = true;
     while continue_game {
         // Propose next step
@@ -36,9 +30,6 @@ fn solve_part1(input: &str) -> u64 {
 
         // If next step contains an obstacle, turn right. If next step is out of the grid,
         // the game is over.
-        // Looks a good candidate to use pattern matching!
-        // Remember to increase steps_count if we moved.
-        // And don't forget to update continue_game to false if the game is over.
         let candidate = match grid.get(candidate_position.0) {
             Some(v) => v,
             None => return count_visited(&grid),
@@ -47,17 +38,15 @@ fn solve_part1(input: &str) -> u64 {
             Some(v) => v,
             None => return count_visited(&grid),
         };
-        // println!("Step: {:?}, Value: {:?}", steps_count, candidate);
         match candidate {
             '#' => {
                 // Skip and turn right next time
                 direction_index += 1;
             }
             '.' | 'x' | '^' => {
-                // Valid landing spot
+                // Valid landing position
                 current_position = candidate_position;
                 grid[current_position.0][current_position.1] = 'x';
-                steps_count += 1;
                 continue;
             }
             _ => continue_game = false,
@@ -90,9 +79,13 @@ fn count_visited(grid: &Vec<Vec<char>>) -> u64 {
     result
 }
 
+fn solve_part2(input: &str) -> u64 {
+    0
+}
+
 #[cfg(test)]
 mod test {
-    use crate::{count_visited, get_starting_position, solve_part1};
+    use crate::{count_visited, get_starting_position, solve_part1, solve_part2};
 
     #[test]
     fn test_find_starting_point() {
@@ -153,5 +146,23 @@ mod test {
         let grid = grid.lines().map(|line| line.chars().collect()).collect();
         let result = count_visited(&grid);
         assert_eq!(result, 7)
+    }
+
+    #[test]
+    fn test_simple_part2() {
+        let input = "....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...";
+
+        // When
+        let result = solve_part2(input);
+        assert_eq!(result, 6);
     }
 }
