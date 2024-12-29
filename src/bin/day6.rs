@@ -81,8 +81,11 @@ fn count_visited(grid: &Vec<Vec<char>>) -> u64 {
 
 fn solve_part2(input: &str) -> u64 {
     let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-
-    const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+    for (i, line) in grid.iter().enumerate() {
+        println!("[{:?}] {:?}", i, line);
+    }
+    const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)]; // up, right, down,
+                                                                            // left
     let mut direction_index = 0;
     let mut current_position = get_starting_position(&grid);
 
@@ -103,11 +106,11 @@ fn solve_part2(input: &str) -> u64 {
         // the game is over.
         let candidate = match grid.get(candidate_position.0) {
             Some(v) => v,
-            None => return result,
+            None => return count_loops(&grid),
         };
         let candidate = match candidate.get(candidate_position.1) {
             Some(v) => v,
-            None => return result,
+            None => return count_loops(&grid),
         };
         match candidate {
             '#' => {
@@ -116,35 +119,59 @@ fn solve_part2(input: &str) -> u64 {
                 // Save current position
                 turns.push(current_position);
             }
-            '.' | 'x' | '^' => {
-                // Valid landing position
-                current_position = candidate_position;
-                grid[current_position.0][current_position.1] = 'x';
-
+            '.' | 'x' | '^' | 'o' => {
+                if turns.len() > 2 {
+                    println!("current_position: {:?}, {:?}", current_position, turns);
+                };
                 // Check three turns ago, if the position in the grid shared the
                 // same row OR column with the current position. If so, check if
                 // there is an obstacle between that position and the current position.
                 // If the answer is no, increase count of possible loops.
-                if turns.len() > 3 && current_position.0 == turns[turns.len() - 3].0 {
+                if turns.len() > 2 && current_position.0 == turns[turns.len() - 3].0 {
                     let slice = &grid[current_position.0..turns[turns.len() - 3].0];
                     if !slice.iter().any(|x| x.contains(&'#')) {
+                        println!("Solution found at position: {:?}", candidate_position);
                         result += 1;
+                        current_position = candidate_position;
+                        grid[current_position.0][current_position.1] = 'o';
                     }
-                }
-                if turns.len() > 3 && current_position.1 == turns[turns.len() - 3].1 {
+                } else if turns.len() > 2 && current_position.1 == turns[turns.len() - 3].1 {
                     let slice =
                         &grid[current_position.0][current_position.1..turns[turns.len() - 3].1];
                     if !slice.contains(&'#') {
+                        println!("Solution found at position: {:?}", candidate_position);
                         result += 1;
+                        current_position = candidate_position;
+                        grid[current_position.0][current_position.1] = 'o';
+                    }
+                } else {
+                    // Move to candidate position
+                    // println!("{:?} {:?}", current_position, candidate_position);
+                    current_position = candidate_position;
+                    if candidate != &'o' {
+                        grid[current_position.0][current_position.1] = 'x';
                     }
                 }
-
                 continue;
             }
             _ => continue_game = false,
         };
     }
     0
+}
+fn count_loops(grid: &Vec<Vec<char>>) -> u64 {
+    for (i, line) in grid.iter().enumerate() {
+        println!("[{:?}] {:?}", i, line);
+    }
+    let mut result = 0;
+    for r in grid.iter() {
+        for c in r.iter() {
+            if *c == 'o' {
+                result += 1;
+            }
+        }
+    }
+    result
 }
 
 #[cfg(test)]
