@@ -133,6 +133,7 @@ mod test {
 
     #[test]
     fn test_count_visited() {
+        // Given
         let grid = "....x.....
 ....x....#
 ....x.....
@@ -144,12 +145,17 @@ mod test {
 #.........
 ......#...";
         let grid = grid.lines().map(|line| line.chars().collect()).collect();
+
+        // When
         let result = count_visited(&grid);
+
+        // Then
         assert_eq!(result, 7)
     }
 
     #[test]
     fn test_simple_part2() {
+        // Given
         let input = "....#.....
 .........#
 ..........
@@ -163,6 +169,8 @@ mod test {
 
         // When
         let result = solve_part2(input);
+
+        // Then
         assert_eq!(result, 6);
     }
 }
