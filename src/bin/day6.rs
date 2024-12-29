@@ -80,6 +80,70 @@ fn count_visited(grid: &Vec<Vec<char>>) -> u64 {
 }
 
 fn solve_part2(input: &str) -> u64 {
+    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+
+    const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+    let mut direction_index = 0;
+    let mut current_position = get_starting_position(&grid);
+
+    // Move until we reach the end of the board. If there is something directly in front of
+    // you, turn right 90 degrees. Otherwise, take a step forward.
+    let mut continue_game = true;
+    let mut turns: Vec<(usize, usize)> = vec![];
+    let mut result = 0;
+    while continue_game {
+        // Propose next step
+        let direction = DIRECTIONS[direction_index % 4];
+        let candidate_position = (
+            (current_position.0 as i64 + direction.0) as usize,
+            (current_position.1 as i64 + direction.1) as usize,
+        );
+
+        // If next step contains an obstacle, turn right. If next step is out of the grid,
+        // the game is over.
+        let candidate = match grid.get(candidate_position.0) {
+            Some(v) => v,
+            None => return result,
+        };
+        let candidate = match candidate.get(candidate_position.1) {
+            Some(v) => v,
+            None => return result,
+        };
+        match candidate {
+            '#' => {
+                // Skip and turn right next time
+                direction_index += 1;
+                // Save current position
+                turns.push(current_position);
+            }
+            '.' | 'x' | '^' => {
+                // Valid landing position
+                current_position = candidate_position;
+                grid[current_position.0][current_position.1] = 'x';
+
+                // Check three turns ago, if the position in the grid shared the
+                // same row OR column with the current position. If so, check if
+                // there is an obstacle between that position and the current position.
+                // If the answer is no, increase count of possible loops.
+                if turns.len() > 3 && current_position.0 == turns[turns.len() - 3].0 {
+                    let slice = &grid[current_position.0..turns[turns.len() - 3].0];
+                    if !slice.iter().any(|x| x.contains(&'#')) {
+                        result += 1;
+                    }
+                }
+                if turns.len() > 3 && current_position.1 == turns[turns.len() - 3].1 {
+                    let slice =
+                        &grid[current_position.0][current_position.1..turns[turns.len() - 3].1];
+                    if !slice.contains(&'#') {
+                        result += 1;
+                    }
+                }
+
+                continue;
+            }
+            _ => continue_game = false,
+        };
+    }
     0
 }
 
