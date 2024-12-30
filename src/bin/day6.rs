@@ -90,7 +90,6 @@ fn solve_part2(input: &str) -> u64 {
     // you, turn right 90 degrees. Otherwise, take a step forward.
     let mut continue_game = true;
     let mut obstacle_positions: Vec<(usize, usize)> = vec![];
-    let mut result = 0;
     while continue_game {
         // Propose next step
         let direction = DIRECTIONS[direction_index % 4];
@@ -145,7 +144,6 @@ fn solve_part2(input: &str) -> u64 {
                     .cloned()
                     .collect();
                 if !interesting_obstacles.is_empty() {
-                    result += 1;
                     current_position = candidate_position;
                     grid[current_position.0][current_position.1] = 'o';
                 } else {
@@ -164,9 +162,9 @@ fn solve_part2(input: &str) -> u64 {
 }
 
 fn count_loops(grid: &Vec<Vec<char>>) -> u64 {
-    for (i, line) in grid.iter().enumerate() {
-        println!("[{:?}] {:?}", i, line);
-    }
+    // for (i, line) in grid.iter().enumerate() {
+    //     println!("[{:?}] {:?}", i, line);
+    // }
     let mut result = 0;
     for r in grid.iter() {
         for c in r.iter() {
