@@ -267,6 +267,5 @@ mod test {
 
         // Then
         assert_eq!(result, 6);
-        panic!();
     }
 }
