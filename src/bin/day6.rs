@@ -81,9 +81,6 @@ fn count_visited(grid: &Vec<Vec<char>>) -> u64 {
 
 fn solve_part2(input: &str) -> u64 {
     let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    for (i, line) in grid.iter().enumerate() {
-        println!("[{:?}] {:?}", i, line);
-    }
     const DIRECTIONS: [(i64, i64); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)]; // up, right, down,
                                                                             // left
     let mut direction_index = 0;
@@ -92,7 +89,7 @@ fn solve_part2(input: &str) -> u64 {
     // Move until we reach the end of the board. If there is something directly in front of
     // you, turn right 90 degrees. Otherwise, take a step forward.
     let mut continue_game = true;
-    let mut turns: Vec<(usize, usize)> = vec![];
+    let mut obstacle_positions: Vec<(usize, usize)> = vec![];
     let mut result = 0;
     while continue_game {
         // Propose next step
@@ -116,37 +113,43 @@ fn solve_part2(input: &str) -> u64 {
             '#' => {
                 // Skip and turn right next time
                 direction_index += 1;
-                // Save current position
-                turns.push(current_position);
+                // Save position of every obstacle we encounter
+                obstacle_positions.push(candidate_position);
             }
             '.' | 'x' | '^' | 'o' => {
-                if turns.len() > 2 {
-                    println!("current_position: {:?}, {:?}", current_position, turns);
+                let (op1, op2): (
+                    Box<dyn Fn(usize, usize) -> bool>,
+                    Box<dyn Fn(usize, usize) -> bool>,
+                ) = match direction {
+                    (-1, 0) => (
+                        Box::new(|a: usize, b: usize| a == b),
+                        Box::new(|a: usize, b: usize| a < b),
+                    ), // up
+                    (0, 1) => (
+                        Box::new(|a: usize, b: usize| a < b),
+                        Box::new(|a: usize, b: usize| a == b),
+                    ), // right
+                    (1, 0) => (
+                        Box::new(|a: usize, b: usize| a == b),
+                        Box::new(|a: usize, b: usize| a > b),
+                    ), // down
+                    (0, -1) => (
+                        Box::new(|a: usize, b: usize| a > b),
+                        Box::new(|a: usize, b: usize| a == b),
+                    ), // left
+                    _ => panic!("Invalid direction"),
                 };
-                // Check three turns ago, if the position in the grid shared the
-                // same row OR column with the current position. If so, check if
-                // there is an obstacle between that position and the current position.
-                // If the answer is no, increase count of possible loops.
-                if turns.len() > 2 && current_position.0 == turns[turns.len() - 3].0 {
-                    let slice = &grid[current_position.0..turns[turns.len() - 3].0];
-                    if !slice.iter().any(|x| x.contains(&'#')) {
-                        println!("Solution found at position: {:?}", candidate_position);
-                        result += 1;
-                        current_position = candidate_position;
-                        grid[current_position.0][current_position.1] = 'o';
-                    }
-                } else if turns.len() > 2 && current_position.1 == turns[turns.len() - 3].1 {
-                    let slice =
-                        &grid[current_position.0][current_position.1..turns[turns.len() - 3].1];
-                    if !slice.contains(&'#') {
-                        println!("Solution found at position: {:?}", candidate_position);
-                        result += 1;
-                        current_position = candidate_position;
-                        grid[current_position.0][current_position.1] = 'o';
-                    }
+                let interesting_obstacles: Vec<(usize, usize)> = obstacle_positions
+                    .iter()
+                    .filter(|(x, y)| op1(current_position.0, *x) && op2(current_position.1, *y))
+                    .cloned()
+                    .collect();
+                if !interesting_obstacles.is_empty() {
+                    result += 1;
+                    current_position = candidate_position;
+                    grid[current_position.0][current_position.1] = 'o';
                 } else {
                     // Move to candidate position
-                    // println!("{:?} {:?}", current_position, candidate_position);
                     current_position = candidate_position;
                     if candidate != &'o' {
                         grid[current_position.0][current_position.1] = 'x';
@@ -159,6 +162,7 @@ fn solve_part2(input: &str) -> u64 {
     }
     0
 }
+
 fn count_loops(grid: &Vec<Vec<char>>) -> u64 {
     for (i, line) in grid.iter().enumerate() {
         println!("[{:?}] {:?}", i, line);
@@ -263,5 +267,6 @@ mod test {
 
         // Then
         assert_eq!(result, 6);
+        panic!();
     }
 }
