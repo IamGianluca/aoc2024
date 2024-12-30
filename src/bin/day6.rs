@@ -144,15 +144,12 @@ fn solve_part2(input: &str) -> u64 {
                     .cloned()
                     .collect();
                 if !interesting_obstacles.is_empty() {
-                    current_position = candidate_position;
-                    grid[current_position.0][current_position.1] = 'o';
-                } else {
-                    // Move to candidate position
-                    current_position = candidate_position;
-                    if candidate != &'o' {
-                        grid[current_position.0][current_position.1] = 'x';
-                    }
+                    grid[candidate_position.0][candidate_position.1] = 'o';
+                } else if candidate != &'o' {
+                    grid[candidate_position.0][candidate_position.1] = 'x';
                 }
+                // Move to candidate position
+                current_position = candidate_position;
                 continue;
             }
             _ => continue_game = false,
