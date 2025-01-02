@@ -267,17 +267,17 @@ mod test {
     #[test]
     fn test_bouncing_on_obstacle_not_previously_visited_creates_infinite_loop() {
         // Given
-        let input = "..#..
-....#
-.#...
-..^..
-#....
-...#.";
+        let input = ".#....
+..#...
+.....#
+......
+..^...
+.#..#.";
 
         // When
         let result = solve_part2(input);
 
         // Then
-        assert_eq!(result, 3);
+        assert_eq!(result, 2);
     }
 }
