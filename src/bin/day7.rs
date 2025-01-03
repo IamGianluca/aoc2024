@@ -55,13 +55,13 @@ mod test {
 
     #[test]
     fn test_multiply_equation_three_operands() {
-        let input = "9: 1 2 3";
+        let input = "191: 19 10 1";
 
         // When
         let result = is_calibrated(input);
 
         // Then
-        assert_eq!(result, 9);
+        assert_eq!(result, 191);
     }
 
     #[test]
