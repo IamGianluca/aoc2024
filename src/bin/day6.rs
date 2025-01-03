@@ -6,8 +6,10 @@ fn main() {
     let result_p1 = solve_part1(input.as_str());
     println!("Result part 1: {:?}", result_p1);
 
-    let result_p2 = solve_part2(input.as_str());
-    println!("Result part 2: {:?}", result_p2);
+    // TODO: Result for part 2 is incorrect and the program is extremely slow. Create an unit test
+    // to capture the exact behavior we are currently not supporting correctly and address it.
+    // let result_p2 = solve_part2(input.as_str());
+    // println!("Result part 2: {:?}", result_p2);
 }
 
 fn solve_part1(input: &str) -> u64 {
